@@ -10,7 +10,7 @@
 const DockerContainer = require('../module/DockerContainer');
 
 let dockerContainer = new DockerContainer({
-	name:'struts/s2_3_31',
+	name:'struts/s2_3_1',
 	privatePort:8080,
 	publicPort:8080,
 });

@@ -21,7 +21,7 @@ class DockerContainer{
 
 	/**
 	 * コンテナの作成
-	 * then  : @param {}
+	 * then  : @param None
 	 * catch : @param {String} error
 	 */
 	create(){
@@ -46,20 +46,32 @@ class DockerContainer{
 				};
 				let req = http.request(opt, (res)=>{
 					//console.log('STATUS: ' + res.statusCode);
-					if( res.statusCode < 200 || res.statusCode > 299){
-						reject('Status Code is not 200-299');
+					if( res.statusCode === 201 ){
+						res.setEncoding('utf8');
+						res.on('data', (chunk)=>{
+							//console.log('BODY: ' + chunk);
+							let reqJson = JSON.parse(chunk);
+							if(reqJson['Id'] == undefined){
+								reject('DockerAPI error : ' + chunk);
+							}
+							this.containerInfo.id = reqJson['Id'];
+							//すべての処理が正常に行われた.
+							resolve();
+						});
 					}
-					res.setEncoding('utf8');
-					res.on('data', (chunk)=>{
-						//console.log('BODY: ' + chunk);
-						let reqJson = JSON.parse(chunk);
-						if(reqJson['Id'] == undefined){
-							reject('DockerAPI error : ' + chunk);
-						}
-						this.containerInfo.id = reqJson['Id'];
-						//すべての処理が正常に行われた.
-						resolve();
-					});
+					else if( res.statusCode === 101 ){
+						reject('DockerContainer.create() 101 : Logs returned as a stream');
+					}
+					else if( res.statusCode === 404 ){
+						reject('DockerContainer.create() 404 : No such container');
+					}
+					else if( res.statusCode === 500 ){
+						reject('DockerContainer.create() 500 : Server error');
+					}
+					else {
+						reject('DockerContainer.create() ??? : ??? error');
+					}
+					
 				});
 				req.on('error', (e)=>{
 					reject(e.message);
@@ -94,13 +106,8 @@ class DockerContainer{
 				let req = http.request(opt, (res)=>{
 					//console.log('STATUS: ' + res.statusCode);
 					if( res.statusCode === 204 ){
+						//すべての処理が正常に行われた.
 						resolve();
-						res.setEncoding('utf8');
-						res.on('data', (chunk)=>{
-							console.log('BODY: ' + chunk);
-							//すべての処理が正常に行われた.
-							resolve();
-						});
 					}
 					else if( res.statusCode === 304 ){
 						reject('DockerContainer.start() 304 : Container already started');
@@ -129,7 +136,7 @@ class DockerContainer{
 	/**
 	 * コンテナ情報の表示
 	 * then  : @param {Object} info
-	 * catch : なし
+	 * catch : @param None
 	 */
 	getInfo(){
 		return new Promise((resolve, reject)=>{
