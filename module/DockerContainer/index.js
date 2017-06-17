@@ -13,8 +13,8 @@ const http = require('http');
 class DockerContainer{
 	constructor(obj){
 		this.containerInfo = {};
-		this.containerInfo.Name = obj.Name;
-		this.containerInfo.Id = null;
+		this.containerInfo.name = obj.name;
+		this.containerInfo.id = null;
 		this.containerInfo.privatePort = obj.privatePort;
 		this.containerInfo.publicPort = obj.publicPort;
 	}
@@ -27,14 +27,14 @@ class DockerContainer{
 	create(){
 		return new Promise((resolve, reject)=>{
 			try{
-				let postJson = {
-					Image: this.containerInfo.Name,
-					Ports: [{
-						PrivatePort: this.containerInfo.privatePort,
-						PublicPort: this.containerInfo.publicPortt,
-						Type: "tcp",
-					}],
-				};
+				let postJson = {};
+				postJson['Image'] = this.containerInfo.name;
+				postJson['HostConfig'] = {};
+				postJson['HostConfig']['PortBindings'] = {};
+				postJson['HostConfig']['PortBindings'][this.containerInfo.privatePort + '/tcp'] = [
+					{ HostPort: String(this.containerInfo.publicPort) }
+				];
+				//console.log(JSON.stringify(postJson));
 				let opt = {
 					socketPath : '/var/run/docker.sock',
 					path : '/v1.29/containers/create',
@@ -56,7 +56,7 @@ class DockerContainer{
 						if(reqJson['Id'] == undefined){
 							reject('DockerAPI error : ' + chunk);
 						}
-						this.containerInfo.Id = reqJson['Id'];
+						this.containerInfo.id = reqJson['Id'];
 						//すべての処理が正常に行われた.
 						resolve();
 					});
