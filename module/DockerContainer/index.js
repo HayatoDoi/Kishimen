@@ -75,6 +75,58 @@ class DockerContainer{
 	}
 
 	/**
+	 * コンテナの起動
+	 * then  : @param None
+	 * catch : @param {String} error
+	 */
+	start(){
+		return new Promise((resolve, reject)=>{
+			try{
+				let opt = {
+					socketPath : '/var/run/docker.sock',
+					path : '/v1.29/containers/' + this.containerInfo.id + '/start',
+					method : 'POST',
+					headers : {
+						'Content-Type' : 'application/json',
+					},
+				};
+				console.log(JSON.stringify(opt));
+				let req = http.request(opt, (res)=>{
+					//console.log('STATUS: ' + res.statusCode);
+					if( res.statusCode === 204 ){
+						resolve();
+						res.setEncoding('utf8');
+						res.on('data', (chunk)=>{
+							console.log('BODY: ' + chunk);
+							//すべての処理が正常に行われた.
+							resolve();
+						});
+					}
+					else if( res.statusCode === 304 ){
+						reject('DockerContainer.start() 304 : Container already started');
+					}
+					else if( res.statusCode === 404 ){
+						reject('DockerContainer.start() 404 : No such container');
+					}
+					else if( res.statusCode === 500 ){
+						reject('DockerContainer.start() 500 : Server error');
+					}
+					else {
+						reject('DockerContainer.start() ??? : ??? error');
+					}
+				});
+				req.on('error', (e)=>{
+					reject(e.message);
+				});
+				req.end();
+			}
+			catch(e){
+				reject(e);
+			}
+		});
+	}
+
+	/**
 	 * コンテナ情報の表示
 	 * then  : @param {Object} info
 	 * catch : なし

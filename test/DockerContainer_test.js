@@ -21,6 +21,13 @@ dockerContainer.create()
 	dockerContainer.getInfo()
 	.then((info)=>{
 		console.log(info);
+			dockerContainer.start()
+			.then(()=>{
+				console.log('Success : Container start');
+			})
+			.catch((error)=>{
+				console.log(error);
+			});
 	});
 })
 .catch((error)=>{
