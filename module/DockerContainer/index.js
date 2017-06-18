@@ -102,7 +102,7 @@ class DockerContainer{
 						'Content-Type' : 'application/json',
 					},
 				};
-				console.log(JSON.stringify(opt));
+				//console.log(JSON.stringify(opt));
 				let req = http.request(opt, (res)=>{
 					//console.log('STATUS: ' + res.statusCode);
 					if( res.statusCode === 204 ){
@@ -120,6 +120,103 @@ class DockerContainer{
 					}
 					else {
 						reject('DockerContainer.start() ??? : ??? error');
+					}
+				});
+				req.on('error', (e)=>{
+					reject(e.message);
+				});
+				req.end();
+			}
+			catch(e){
+				reject(e);
+			}
+		});
+	}
+
+	/**
+	 * コンテナの停止
+	 * then  : @param None
+	 * catch : @param {String} error
+	 */
+	stop(){
+		return new Promise((resolve, reject)=>{
+			try{
+				let opt = {
+					socketPath : '/var/run/docker.sock',
+					path : '/v1.29/containers/' + this.containerInfo.id + '/stop',
+					method : 'POST',
+					headers : {
+						'Content-Type' : 'application/json',
+					},
+				};
+				//console.log(JSON.stringify(opt));
+				let req = http.request(opt, (res)=>{
+					//console.log('STATUS: ' + res.statusCode);
+					if( res.statusCode === 204 ){
+						//すべての処理が正常に行われた.
+						resolve();
+					}
+					else if( res.statusCode === 304 ){
+						reject('DockerContainer.stop() 304 : Container already stopped');
+					}
+					else if( res.statusCode === 404 ){
+						reject('DockerContainer.stop() 404 : No such container');
+					}
+					else if( res.statusCode === 500 ){
+						reject('DockerContainer.stop() 500 : Server error');
+					}
+					else {
+						reject('DockerContainer.stop() ??? : ??? error');
+					}
+				});
+				req.on('error', (e)=>{
+					reject(e.message);
+				});
+				req.end();
+			}
+			catch(e){
+				reject(e);
+			}
+		});
+	}
+
+	/**
+	 * コンテナの削除
+	 * then  : @param None
+	 * catch : @param {String} error
+	 */
+	remove(){
+		return new Promise((resolve, reject)=>{
+			try{
+				let opt = {
+					socketPath : '/var/run/docker.sock',
+					path : '/v1.29/containers/' + this.containerInfo.id,
+					method : 'DELETE',
+					headers : {
+						'Content-Type' : 'application/json',
+					},
+				};
+				//console.log(JSON.stringify(opt));
+				let req = http.request(opt, (res)=>{
+					//console.log('STATUS: ' + res.statusCode);
+					if( res.statusCode === 204 ){
+						//すべての処理が正常に行われた.
+						resolve();
+					}
+					else if( res.statusCode === 400 ){
+						reject('DockerContainer.remove() 400 : Bad parameter');
+					}
+					else if( res.statusCode === 404 ){
+						reject('DockerContainer.remove() 404 : No such container');
+					}
+					else if( res.statusCode === 409 ){
+						reject('DockerContainer.remove() 409 : Conflict');
+					}
+					else if( res.statusCode === 500 ){
+						reject('DockerContainer.remove() 500 : Server error');
+					}
+					else {
+						reject('DockerContainer.remove() ??? : ??? error');
 					}
 				});
 				req.on('error', (e)=>{

@@ -10,7 +10,7 @@
 const DockerContainer = require('../module/DockerContainer');
 
 let dockerContainer = new DockerContainer({
-	name:'struts/s2_3_1',
+	name:'struts/s2_3_31',
 	privatePort:8080,
 	publicPort:8080,
 });
@@ -24,6 +24,20 @@ dockerContainer.create()
 			dockerContainer.start()
 			.then(()=>{
 				console.log('Success : Container start');
+				dockerContainer.stop()
+				.then(()=>{
+					console.log('Success : Container stop');
+					dockerContainer.remove()
+					.then(()=>{
+						console.log('Success : Container remove');
+					})
+					.catch((error)=>{
+						console.log(error);
+					})
+				})
+				.catch((error)=>{
+					console.log(error);
+				});
 			})
 			.catch((error)=>{
 				console.log(error);
