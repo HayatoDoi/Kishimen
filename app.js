@@ -4,6 +4,7 @@ const cookie = require('cookie');
 const server = http.createServer();
 const proxy = httpProxy.createServer();
 const DB = require('./module/DB');
+const Log = require('./module/Log');
 let db = new DB;
 
 server.on('request',(req, res)=>{
@@ -12,6 +13,7 @@ server.on('request',(req, res)=>{
 	console.log(sesstion_id);//dubug
 	res.setHeader('Set-Cookie', [`Kishimen_id=${sesstion_id}; max-age=${60 * 30}`]);
 	proxy.web(req, res, {target : {host : 'localhost',port : '8080'}});
+	Log.save(sesstion_id, req, res);
 });
 
 server.listen(9000, ()=>{
