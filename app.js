@@ -3,7 +3,7 @@ const http = require('http');
 const cookie = require('cookie');
 const server = http.createServer();
 const proxy = httpProxy.createServer();
-const DB = require('./module/DB');
+const DB = require('module/DB');
 let db = new DB;
 
 server.on('request',(req, res)=>{
