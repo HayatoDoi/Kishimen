@@ -8,14 +8,15 @@
  */
 
 module.exports = class Logger {
-	constructor(filename){
+	constructor(filename, level = 'error'){
 		const log4js = require('log4js');
-		// log4js.configure({
-		// 	appenders: { cheese: { type: 'file', filename: filename } },
-		// 	categories: { default: { appenders: ['Kishimen'], level: 'error' } }
-		// });
-		//this.echo = log4js.getLogger('request');
-		this.echo = log4js.getLogger();
-		//this.echo.level = 'debug';
+		log4js.configure({
+			appenders:{
+				file:{type:'file', filename:filename},
+				console:{type:'console'}
+				},
+			categories:{default:{appenders:['file', 'console'], level:level}}
+			});
+		this.logger = log4js.getLogger('Kishimen');
 	}
 }
