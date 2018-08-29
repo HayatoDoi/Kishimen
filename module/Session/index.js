@@ -9,14 +9,15 @@
 
 
 /* *
- * { sesstion_key : string,
- *   container_id : string
+ * { sesstion_key(string) : {
+ *   timerID : id
+ * },
  * }
  * */
 class Session{
-	constructor(logger){
-		this.sesstions = {}; //sesstion格納用配列
-		this.logger = logger
+	constructor(){
+		this.__sesstions = {}; //sesstion格納用配列
+		this.__sessionEndTime = 5 * 1000;//sec
 	}
 
 	/**
@@ -30,22 +31,41 @@ class Session{
 		// 生成する文字列に含める文字セット
 		const c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		const cl = c.length;
-		let r = "";
+		let sessionID = "";
 		for(let i=0; i<str_len; i++){
-			r += c[Math.floor(Math.random()*cl)];
+			sessionID += c[Math.floor(Math.random()*cl)];
 		}
-		this.sesstions[r] = {};
-		return r;
+		//make session
+		this.__sesstions[sessionID] = {};
+		//start session timer
+		let timerID = setTimeout(()=>{
+			this.delete(sessionID);
+		},this.__sessionEndTime);
+		this.set(sessionID, 'timerID', timerID);
+		return sessionID;
 	}
 	// debuug only
 	showAll(){
-		console.log(this.sesstions);
+		return this.__sesstions;
 	}
 	set(s, k, v){
-		this.sesstions[s][k] = v;
+		this.__sesstions[s][k] = v;
 	}
 	get(s, k){
-		return this.sesstions[s][k];
+		return this.__sesstions[s][k];
+	}
+	update(sessionID){
+		clearTimeout(this.get(sessionID, 'timerID'));
+		let timerID = setTimeout(()=>{
+			this.delete(sessionID);
+		},this.__sessionEndTime);
+		this.set(sessionID, 'timerID', timerID);
+	}
+	delete(sessionID){
+		delete this.__sesstions[sessionID];
+		if(this.endEventHandler != undefined){
+			this.endEventHandler(sessionID);
+		}
 	}
 }
 module.exports = Session;
