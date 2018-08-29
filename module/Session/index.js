@@ -1,6 +1,6 @@
 /**
  * データベース
- * File name : module/DB/index.js
+ * File name : module/Session/index.js
  * Copyright (c) 2018, Hayato Doi
  * ------------------------------------------------
  * This software is released under the MIT License.
@@ -13,9 +13,10 @@
  *   container_id : string
  * }
  * */
-class DB{
-	constructor(){
+class Session{
+	constructor(logger){
 		this.sesstions = {}; //sesstion格納用配列
+		this.logger = logger
 	}
 
 	/**
@@ -23,7 +24,7 @@ class DB{
 	 * @param None
 	 * @return {String} settion
 	 */
-	newSession(){
+	new(){
 		// 生成する文字列の長さ
 		const str_len = 40;
 		// 生成する文字列に含める文字セット
@@ -37,7 +38,7 @@ class DB{
 		return r;
 	}
 	// debuug only
-	showAllSesstions(){
+	showAll(){
 		console.log(this.sesstions);
 	}
 	set(s, k, v){
@@ -47,4 +48,4 @@ class DB{
 		return this.sesstions[s][k];
 	}
 }
-module.exports = DB;
+module.exports = Session;
