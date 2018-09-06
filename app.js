@@ -2,6 +2,7 @@ const httpProxy = require('http-proxy');
 const http = require('http');
 const cookie = require('cookie');
 const requestIp = require('request-ip');
+const VisualizationApp = require('VisualizationApp');
 const server = http.createServer();
 const proxy = httpProxy.createServer();
 require('date-utils');
@@ -47,6 +48,8 @@ server.on('request',(req, res)=>{
 server.listen(9000, ()=>{
 	sysLogger.info('server listen : http://localhost:9000');
 });
+
+VisualizationApp();
 
 function getTimeLocal(){
 	const date = new Date();
