@@ -3,6 +3,7 @@ const http = require('http');
 const cookie = require('cookie');
 const requestIp = require('request-ip');
 const VisualizationApp = require('VisualizationApp');
+const fs = require('fs');
 const server = http.createServer();
 const proxy = httpProxy.createServer();
 require('date-utils');
@@ -10,7 +11,6 @@ const Session = require('module/Session');
 let session = new Session;
 const Logger = require('module/Log');
 let sysLogger = new Logger('log/Kisimen/log.log', 'debug').logger;
-let accessLogger = new Logger('log/web/access.log', 'debug').logger;
 session.endEventHandler = (sessionID)=>{
 	sysLogger.info('session delete : ' + sessionID);
 }
@@ -31,15 +31,20 @@ server.on('request',(req, res)=>{
 	res.write = (data)=>{
 		_write.call(res, data.toString());
 
-		const remoteAddr = requestIp.getClientIp(req),
-					timeLocal = getTimeLocal(),
-					request = `${req.method} ${req.url} HTTP/${req.httpVersion}`,
-					status = res.statusCode,
-					bytesSent = Buffer.byteLength(data),
-					referer = req.headers['referer'] || '',
-					userAgent = req.headers['user-agent'] || '';
-		let l = `${req.sessionID} ${remoteAddr} - - [${timeLocal}] "${request}" ${status} ${bytesSent} "${referer}" "${userAgent}"`;
-		console.log(l);
+		let l = {
+			hackerID : req.sessionID,
+			remoteAddr : requestIp.getClientIp(req),
+			// timeLocal : getTimeLocal(),
+			timeLocal : Date.now(),
+			requestMethod : req.method,
+			requestUrl : req.url,
+			statusCode : res.statusCode,
+			bytesSent : Buffer.byteLength(data),
+			referer : req.headers['referer'] || '',
+			userAgent : req.headers['user-agent'] || '',
+		};
+		// let l = `${req.sessionID} ${remoteAddr} - - [${timeLocal}] "${request}" ${status} ${bytesSent} "${referer}" "${userAgent}"\n`;
+		appendFile('log/web/access.log', JSON.stringify(l) + '\n');
 	}
 
 	proxy.web(req, res, {target : {host : 'localhost',port : '8080'}});
@@ -59,3 +64,12 @@ function getTimeLocal(){
 	const timeLocal = `${date.toFormat('DD/MMM/YYYY:HH24:MI:SS')} ${offset}`;
 	return timeLocal;
 }
+
+function appendFile(path, data) {
+	fs.appendFile(path, data, function (err) {
+		if (err) {
+			throw err;
+		}
+	});
+}
+

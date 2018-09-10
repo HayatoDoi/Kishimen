@@ -1,0 +1,18 @@
+#canvas{
+height: 264px;
+/* width: 100%; */
+}
+#table{
+border-collapse: collapse;
+margin-top: 40px;
+}
+#table th,td{
+border: solid 1px black;
+}
+#table th{
+background: #c3c3c3;
+padding: 10px;
+}
+#table td{
+padding: 3px 10px;
+}
