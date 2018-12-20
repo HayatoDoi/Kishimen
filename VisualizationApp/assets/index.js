@@ -1,5 +1,5 @@
 var accessLog = [];
-var drawChartData = {};
+var drawChartData = [];
 var xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function() {
 	switch ( xhr.readyState ) {
@@ -28,6 +28,7 @@ xhr.onreadystatechange = function() {
 				}
 				// console.log( 'COMPLETE! :\n'+data );S
 				drawChartData = constData(accessLog);
+				console.log(drawChartData);
 				drawCanvas();
 				drawTable();
 			} else {
@@ -46,11 +47,26 @@ function drawCanvas(){
 	canvasData.datasets = [{
 		backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
 		borderColor: window.chartColors.blue,
+		backgroundColor: [],
+		borderColor: [],
+		borderWidth: [],
 		data:[]
 	}];
-	for(key in drawChartData){
-		canvasData.labels.push(key.substring(0, 5));
-		canvasData.datasets[0].data.push(drawChartData[key]);
+	// for(key in drawChartData){
+	for(var i = 0; i < drawChartData.length; i++){
+		var hackerID_5str = drawChartData[i]['hackerID'].substring(0, 5);
+		canvasData.labels.push(hackerID_5str);
+		// canvasData.datasets[0].backgroundColor.push(drawChartData[i]['hackFlag'] === true ? );
+		canvasData.datasets[0].backgroundColor.push(
+			(drawChartData[i]['hackFlag'] === true)
+			// (key.substring(0,5) === hackerID)
+				?color(window.chartColors.red).alpha(0.5).rgbString()
+			// 	:color(window.chartColors.blue).alpha(0.5).rgbString()
+				:color(window.chartColors.blue).alpha(0.5).rgbString()
+		);
+		canvasData.datasets[0].borderColor.push(color(window.chartColors.blue));
+		canvasData.datasets[0].borderWidth.push(0);
+		canvasData.datasets[0].data.push(drawChartData[i]['count']);
 	}
 	canvasData.datasets[0].data.push(0);
 	var ctx = document.getElementById('canvas').getContext('2d');
@@ -81,21 +97,26 @@ function selectHoackerID(hackerID){
 	canvasData.datasets = [{
 		backgroundColor: [],
 		borderColor: [],
+		borderWidth: [],
 		data:[]
 	}];
-	for(key in drawChartData){
-		canvasData.labels.push(key.substring(0, 5));
-		canvasData.datasets[0].data.push(drawChartData[key]);
+	for(var i = 0; i < drawChartData.length; i++){
+		var hackerID_5str = drawChartData[i]['hackerID'].substring(0, 5);
+		canvasData.labels.push(hackerID_5str);
+		canvasData.datasets[0].data.push(drawChartData[i]['count']);
 		canvasData.datasets[0].backgroundColor.push(
-			(key.substring(0,5) === hackerID)
+			(drawChartData[i]['hackFlag'] === true)
+			// (key.substring(0,5) === hackerID)
 				?color(window.chartColors.red).alpha(0.5).rgbString()
+			// 	:color(window.chartColors.blue).alpha(0.5).rgbString()
 				:color(window.chartColors.blue).alpha(0.5).rgbString()
 		);
 		canvasData.datasets[0].borderColor.push(
-			(key.substring(0,5) === hackerID)
-				?color(window.chartColors.red)
+			(hackerID_5str === hackerID)
+				?"rgba(0, 0, 0, 1)"
 				:color(window.chartColors.blue)
 		);
+		canvasData.datasets[0].borderWidth.push( (hackerID_5str === hackerID) ? 5 : 0 );
 	}
 	canvasData.datasets[0].data.push(0);
 
@@ -104,10 +125,28 @@ function selectHoackerID(hackerID){
 }
 
 function constData(data){
-	var r = {};
+	var r = [];//{hackerID:'', count:0, hackFlag:T/F}
 	for(var i = 0; i < data.length; i++){
 		var d = data[i];
-		r[d['hackerID']] == undefined ? r[d['hackerID']] = 1 : r[d['hackerID']]++;
+		console.log(d);
+		var j = 0;
+		for(j = 0; j < r.length; j++){
+			if(r[j]['hackerID'] === d['hackerID']){
+				r[j]['count']++;
+				if(d['hackMethod'] !== ''){
+					r[j]['hackFlag'] = true;
+				}
+				break;
+			}
+		}
+		if(j === r.length){
+			r.push({hackerID:d['hackerID'], count:1, hackFlag: d['hackMethod'] !== ''?true:false});
+		}
+		// if(r[d['hackerID']] == undefined){
+		// 	r[d['hackerID']] = 1;
+		// } else {
+		// 	r[d['hackerID']]++;
+		// }
 	}
 	return r;
 }
@@ -131,7 +170,7 @@ function drawTable(hackerID){
 	for(i in accessLog){
 		var al = accessLog[i];
 		if(al.hackerID.substring(0, 5) === hackerID || hackerID == undefined){
-			console.log(al);
+			// console.log(al);
 			var tr = document.createElement('tr');
 			var tdHackerID = document.createElement('td');
 			var tdRemoteAddr = document.createElement('td');
