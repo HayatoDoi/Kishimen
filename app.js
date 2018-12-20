@@ -14,6 +14,9 @@ let sysLogger = new Logger('log/Kisimen/log.log', 'debug').logger;
 session.endEventHandler = (sessionID)=>{
 	sysLogger.info('session delete : ' + sessionID);
 }
+const SignatureMatch = require('module/SignatureMatch');
+const signatures = require('signatures');
+const signatureMatch = new SignatureMatch(signatures);
 
 server.on('request',(req, res)=>{
 	let c = req.headers.cookie || ""
@@ -34,6 +37,7 @@ server.on('request',(req, res)=>{
 		let l = {
 			hackerID : req.sessionID,
 			remoteAddr : requestIp.getClientIp(req),
+			hackMethod : '',
 			// timeLocal : getTimeLocal(),
 			timeLocal : Date.now(),
 			requestMethod : req.method,
@@ -43,7 +47,7 @@ server.on('request',(req, res)=>{
 			referer : req.headers['referer'] || '',
 			userAgent : req.headers['user-agent'] || '',
 		};
-		// let l = `${req.sessionID} ${remoteAddr} - - [${timeLocal}] "${request}" ${status} ${bytesSent} "${referer}" "${userAgent}"\n`;
+		l.hackMethod = signatureMatch.match(l) || '';
 		appendFile('log/web/access.log', JSON.stringify(l) + '\n');
 	}
 
