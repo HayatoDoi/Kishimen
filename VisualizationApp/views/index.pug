@@ -1,0 +1,21 @@
+html
+  head
+    title= title
+    // script(src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js")
+    script(src="http://www.chartjs.org/dist/2.7.2/Chart.bundle.js")
+    script(src="http://www.chartjs.org/samples/latest/utils.js")
+    link(rel="stylesheet",type="text/css",href="assets/index.css")
+  body
+    canvas#canvas
+    table#table
+      tr
+        th hackerID
+        th remoteAddr
+        th time
+        th requestMethod
+        th requestUrl
+        th statusCode
+        th bytesSent
+        th userAgent
+  script(src="/assets/index.js")
+
